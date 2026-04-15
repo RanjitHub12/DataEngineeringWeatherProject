@@ -1,0 +1,258 @@
+version: '3.8'
+
+# ============================================================================
+# DOCKER COMPOSE: Weather Forecast Analytical DB Infrastructure
+# ============================================================================
+# This file orchestrates 5 services:
+#   1. PostgreSQL (Data Warehouse) - port 5432
+#   2. PostgreSQL (Airflow Backend) - port 5433
+#   3. Apache Airflow Webserver - port 8080
+#   4. Apache Airflow Scheduler - background process
+# ============================================================================
+
+services:
+  # ========================================================================
+  # SERVICE 1: PostgreSQL Data Warehouse (OLAP Database)
+  # ========================================================================
+  # Purpose: Stores the Star Schema with fact_weather and dimensions
+  # Persistence: Named volume 'postgres_dw_data'
+  # Port: 5432 (internal and external)
+  
+  weather-postgres:
+    image: postgres:13-alpine
+    container_name: weather-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      # Named volume for persistent data
+      - postgres_dw_data:/var/lib/postgresql/data
+      # Mount initialization script in the container
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - weather-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    labels:
+      description: "PostgreSQL Data Warehouse for OLAP queries"
+
+
+  # ========================================================================
+  # SERVICE 2: PostgreSQL Backend (Airflow Metadata Database)
+  # ========================================================================
+  # Purpose: Stores Airflow metadata (DAG history, task runs, connections)
+  # Separation: Different instance from Data Warehouse for isolation
+  # Port: 5433 (internal and external)
+  
+  weather-airflow-postgres:
+    image: postgres:13-alpine
+    container_name: weather-airflow-postgres
+    environment:
+      POSTGRES_USER: ${AIRFLOW_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AIRFLOW_POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "${AIRFLOW_POSTGRES_PORT}:5432"
+    volumes:
+      # Named volume for persistent data
+      - postgres_airflow_data:/var/lib/postgresql/data
+    networks:
+      - weather-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AIRFLOW_POSTGRES_USER} -d ${AIRFLOW_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    labels:
+      description: "PostgreSQL Airflow Metadata Backend"
+
+
+  # ========================================================================
+  # SERVICE 3: Apache Airflow Webserver
+  # ========================================================================
+  # Purpose: Provides UI for managing DAGs, monitoring, and triggering tasks
+  # Dependencies: weather-airflow-postgres (must be healthy first)
+  # Port: 8080
+  # Login: username=airflow, password=airflow (from .env)
+  
+  weather-airflow:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile.airflow
+    container_name: weather-airflow
+    command: webserver
+    environment:
+      # Airflow database connection
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@weather-airflow-postgres:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW_DB_HOST: weather-airflow-postgres
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      
+      # Webserver settings
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'True'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+      AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME: ${AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME}
+      AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD: ${AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD}
+      
+      
+      # Data Warehouse connection (for ETL tasks)
+      DW_USER: ${POSTGRES_USER}
+      DW_PASSWORD: ${POSTGRES_PASSWORD}
+      DW_HOST: weather-postgres
+      DW_PORT: 5432
+      DW_NAME: ${POSTGRES_DB}
+    
+    ports:
+      - "${AIRFLOW_WEBSERVER_PORT}:8080"
+    
+    volumes:
+          # Mount DAGs directory (hot-reload enabled)
+          - ./airflow/dags:/opt/airflow/dags
+          # Persistent storage for Airflow logs
+          - ./logs:/opt/airflow/logs
+        
+    networks:
+      - weather-network
+    
+    depends_on:
+      weather-airflow-postgres:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    
+    restart: unless-stopped
+    
+    labels:
+      description: "Apache Airflow Webserver and Scheduler"
+
+
+  # ========================================================================
+  # SERVICE 4: Apache Airflow Scheduler
+  # ========================================================================
+  # Purpose: Background daemon that monitors DAGs and triggers task execution
+  # Dependencies: weather-airflow-postgres and weather-airflow (webserver)
+  # No exposed port (background process only)
+  
+  weather-airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile.airflow
+    container_name: weather-airflow-scheduler
+    environment:
+      # Airflow database connection (must match webserver)
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@weather-airflow-postgres:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW_DB_HOST: weather-airflow-postgres
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      
+      # Core scheduler settings
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+      
+      # Data Warehouse connection (for ETL tasks)
+      DW_USER: ${POSTGRES_USER}
+      DW_PASSWORD: ${POSTGRES_PASSWORD}
+      DW_HOST: weather-postgres
+      DW_PORT: 5432
+      DW_NAME: ${POSTGRES_DB}
+    
+    command: scheduler
+    
+    volumes:
+          # Mount DAGs directory (hot-reload enabled)
+          - ./airflow/dags:/opt/airflow/dags
+          # Persistent storage for Airflow logs
+          - ./logs:/opt/airflow/logs
+    
+    networks:
+      - weather-network
+    
+    depends_on:
+      weather-airflow-postgres:
+        condition: service_healthy
+      weather-airflow:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    labels:
+      description: "Apache Airflow Scheduler Service"
+
+
+  # ========================================================================
+  # SERVICE 5: FastAPI Backend
+  # ========================================================================
+  # Purpose: REST API serving weather data to frontend dashboard
+  # Dependencies: weather-postgres (Data Warehouse)
+  # Port: 8000
+  
+  weather-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather-backend
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: weather-postgres
+      POSTGRES_PORT: 5432
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    networks:
+      - weather-network
+    depends_on:
+      weather-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    labels:
+      description: "FastAPI Backend API Server"
+
+
+# ============================================================================
+# NETWORKS: Service Communication
+# ============================================================================
+# All services communicate via this bridge network
+# Container DNS resolution allows services to find each other by name
+
+networks:
+  weather-network:
+    driver: bridge
+    name: weather-network
+
+
+# ============================================================================
+# VOLUMES: Persistent Data Storage
+# ============================================================================
+# Named volumes persist data across container restarts
+
+volumes:
+  # Data Warehouse persistence
+  postgres_dw_data:
+    driver: local
+    name: postgres_dw_data
+  
+  # Airflow metadata persistence
+  postgres_airflow_data:
+    driver: local
+    name: postgres_airflow_data
