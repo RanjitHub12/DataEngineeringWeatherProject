@@ -35,6 +35,9 @@ if [[ "$1" == "webserver" ]]; then
         --email ${AIRFLOW_ADMIN_EMAIL:-admin@example.com} \
         --password ${AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD:-airflow} \
         || echo "Admin user already exists"
+
+    echo "Triggering weather_etl_pipeline DAG on startup..."
+    airflow dags trigger weather_etl_pipeline || echo "DAG trigger skipped (not found yet)"
 fi
 
 # Execute the passed command (webserver or scheduler)

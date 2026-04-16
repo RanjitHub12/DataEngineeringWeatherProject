@@ -69,6 +69,9 @@ docker-compose --env-file backend/.env -f backend/docker-compose.yml logs -f
 
 # Wait until all services are healthy
 docker-compose --env-file backend/.env -f backend/docker-compose.yml ps
+
+# just run this to start the backend
+docker compose -f docker-compose.yml up -d
 ```
 
 **Verify all containers are running:**

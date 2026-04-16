@@ -66,11 +66,16 @@ const GlobalStyle = createGlobalStyle`
     --panel-light: rgba(255, 255, 255, 0.42);
     --panel-strong: rgba(255, 255, 255, 0.85);
     --border: rgba(255, 255, 255, 0.6);
+    --surface: rgba(255, 255, 255, 0.75);
+    --surface-muted: rgba(255, 255, 255, 0.55);
+    --surface-strong: rgba(255, 255, 255, 0.9);
+    --surface-border: rgba(255, 255, 255, 0.75);
     --accent: #5a9cff;
     --accent-strong: #2d6be0;
     --accent-warm: #ffb36b;
     --warning: #f6b756;
     --success: #2fbf9f;
+    --panel-glow: rgba(255, 255, 255, 0.55);
     --shadow: 0 30px 60px rgba(58, 97, 170, 0.22);
   }
 
@@ -86,6 +91,46 @@ const GlobalStyle = createGlobalStyle`
       radial-gradient(circle at 80% 0%, rgba(255, 211, 169, 0.45), transparent 55%),
       linear-gradient(160deg, #e6f0ff 0%, #d9e8ff 45%, #cfe2ff 100%);
     color: var(--ink);
+  }
+
+  body[data-theme='dark'] {
+    color-scheme: dark;
+    --ink: #f5f8ff;
+    --muted: #c9d6ee;
+    --panel: rgba(12, 20, 34, 0.95);
+    --panel-light: rgba(18, 28, 44, 0.88);
+    --panel-strong: rgba(22, 32, 50, 0.98);
+    --border: rgba(120, 150, 190, 0.3);
+    --surface: rgba(20, 30, 46, 0.95);
+    --surface-muted: rgba(16, 26, 40, 0.78);
+    --surface-strong: rgba(32, 44, 66, 0.98);
+    --surface-border: rgba(120, 150, 200, 0.32);
+    --panel-glow: rgba(90, 120, 170, 0.22);
+    --shadow: 0 30px 60px rgba(6, 12, 24, 0.55);
+    background:
+      radial-gradient(circle at 20% 15%, rgba(46, 76, 128, 0.55), transparent 55%),
+      radial-gradient(circle at 82% 0%, rgba(82, 60, 44, 0.4), transparent 58%),
+      linear-gradient(160deg, #0b1220 0%, #0e1a2d 55%, #0a101d 100%);
+  }
+
+  body[data-theme='dark'] {
+    color-scheme: dark;
+    --ink: #e8f0ff;
+    --muted: #b4c6e5;
+    --panel: rgba(14, 22, 35, 0.92);
+    --panel-light: rgba(18, 28, 44, 0.75);
+    --panel-strong: rgba(22, 32, 50, 0.96);
+    --border: rgba(130, 155, 190, 0.2);
+    --surface: rgba(24, 34, 52, 0.85);
+    --surface-muted: rgba(20, 30, 48, 0.65);
+    --surface-strong: rgba(34, 46, 68, 0.95);
+    --surface-border: rgba(140, 170, 210, 0.25);
+    --panel-glow: rgba(90, 120, 170, 0.2);
+    --shadow: 0 30px 60px rgba(6, 12, 24, 0.55);
+    background:
+      radial-gradient(circle at 20% 10%, rgba(52, 83, 140, 0.6), transparent 55%),
+      radial-gradient(circle at 80% 0%, rgba(110, 71, 46, 0.45), transparent 55%),
+      linear-gradient(160deg, #0f1726 0%, #101c2f 55%, #0d1626 100%);
   }
 
   ::selection {
@@ -117,16 +162,19 @@ const DashboardShell = styled.div`
 `
 const MainPanel = styled.section`
   max-width: 1180px;
+  width: min(1180px, 100%);
   margin: 0 auto;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 34px;
-  padding: 20px 24px;
+  padding: 20px 24px 72px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
   position: relative;
   overflow: hidden;
-  height: min(900px, calc(100vh - 40px));
+  height: calc(100vh - 40px);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 12px;
@@ -135,7 +183,7 @@ const MainPanel = styled.section`
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.55), transparent 55%);
+    background: radial-gradient(circle at 20% 20%, var(--panel-glow), transparent 55%);
     opacity: 0.6;
     pointer-events: none;
   }
@@ -173,8 +221,8 @@ const BrandSubtitle = styled.div`
 const TopNav = styled.div`
   display: inline-flex;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
   padding: 6px;
   border-radius: 999px;
   flex-wrap: wrap;
@@ -182,7 +230,7 @@ const TopNav = styled.div`
 
 const NavButton = styled.button`
   border: none;
-  background: ${(props) => (props.$active ? '#ffffff' : 'transparent')};
+  background: ${(props) => (props.$active ? 'var(--surface-strong)' : 'transparent')};
   color: var(--ink);
   padding: 6px 12px;
   border-radius: 999px;
@@ -192,7 +240,7 @@ const NavButton = styled.button`
   box-shadow: ${(props) => (props.$active ? '0 8px 16px rgba(74, 120, 200, 0.2)' : 'none')};
 
   &:hover {
-    background: #ffffff;
+    background: var(--surface-strong);
   }
 `
 
@@ -215,9 +263,9 @@ const CityFilter = styled.label`
 
 const CitySelect = styled.select`
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--surface-border);
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--surface-strong);
   font-family: inherit;
   color: var(--ink);
   font-size: 0.85rem;
@@ -225,9 +273,9 @@ const CitySelect = styled.select`
 
 const HeroGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr) minmax(0, 0.7fr);
-  gap: 14px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 14px 16px;
+  align-items: start;
 
   @media (max-width: 1000px) {
     grid-template-columns: 1fr;
@@ -239,22 +287,28 @@ const HeroCopy = styled.div`
   gap: 10px;
 `
 
+const HeroRight = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 12px 16px;
+  align-items: start;
+
+  @media (max-width: 1000px) {
+    grid-template-columns: 1fr;
+  }
+`
+
 const SlideViewport = styled.div`
   position: relative;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
+  height: auto;
 `
 
 const Slide = styled.div`
-  position: absolute;
-  inset: 0;
-  display: grid;
+  display: ${(props) => (props.$active ? 'grid' : 'none')};
   gap: 12px;
-  opacity: ${(props) => (props.$active ? 1 : 0)};
-  transform: ${(props) => (props.$active ? 'translateX(0)' : 'translateX(18px)')};
-  transition: opacity 0.25s ease, transform 0.35s ease;
-  pointer-events: ${(props) => (props.$active ? 'auto' : 'none')};
+  animation: floatIn 0.35s ease;
 `
 
 const PanelSection = styled.div`
@@ -298,11 +352,33 @@ const PrimaryButton = styled.button`
   }
 `
 
+const ThemeToggle = styled.button`
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(74, 120, 200, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(94, 228, 255, 0.6);
+    outline-offset: 2px;
+  }
+`
+
 const StatusPill = styled.span`
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
   font-size: 0.8rem;
 `
 
@@ -325,10 +401,36 @@ const HeroMetaRow = styled.div`
   align-items: center;
 `
 
+const KpiInline = styled.div`
+  display: grid;
+  gap: 8px;
+  justify-items: stretch;
+  align-self: start;
+  justify-self: end;
+  grid-column: 1 / -1;
+  width: min(420px, 100%);
+  margin-top: -6px;
+
+  @media (max-width: 1000px) {
+    justify-self: stretch;
+    width: 100%;
+    margin-top: 0;
+  }
+`
+
+const KpiInlineTitle = styled.div`
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+`
+
 const WeatherArt = styled.img`
   width: min(200px, 50vw);
   height: auto;
   justify-self: center;
+  align-self: start;
+  margin-top: -8px;
   filter: drop-shadow(0 24px 24px rgba(78, 118, 196, 0.25));
 `
 
@@ -337,6 +439,8 @@ const TemperatureBlock = styled.div`
   text-align: right;
   display: grid;
   gap: 8px;
+  align-self: start;
+  margin-top: -6px;
 
   @media (max-width: 1000px) {
     justify-self: start;
@@ -366,51 +470,65 @@ const TemperatureMeta = styled.div`
 
 const MiniStatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 12px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 const MiniStat = styled.div`
   background: var(--panel-light);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--surface-border);
   border-radius: 16px;
-  padding: 10px 12px;
+  padding: 14px 16px;
+  min-height: 78px;
   display: grid;
   gap: 4px;
+  align-items: center;
+  justify-items: center;
+  text-align: center;
 `
 
 const MiniStatLabel = styled.div`
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `
 
 const MiniStatValue = styled.div`
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
+  text-align: center;
 `
 
 const CityRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-bottom: 4px;
 `
 
 const CityPill = styled.span`
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
   font-size: 0.72rem;
 `
 
 const WaveCard = styled.div`
-  margin-top: 14px;
+  margin-top: 6px;
   background: var(--panel-strong);
   border-radius: 20px;
   padding: 12px 14px 6px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--surface-border);
 `
 
 const WaveTitle = styled.div`
@@ -439,17 +557,24 @@ const SectionLead = styled.p`
 
 const KpiGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 10px;
+  justify-items: end;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
 `
 
 const KpiCard = styled.div`
   background: var(--panel-strong);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--surface-border);
   border-radius: 16px;
-  padding: 14px;
+  padding: 12px 12px;
+  min-height: 70px;
   position: relative;
   overflow: hidden;
+  text-align: center;
   animation: floatIn 0.55s ease both;
 
   &::after {
@@ -464,16 +589,23 @@ const KpiCard = styled.div`
 const KpiBody = styled.div`
   position: relative;
   z-index: 1;
+  display: grid;
+  justify-items: center;
 `
 
 const KpiLabel = styled.div`
   color: var(--muted);
-  font-size: 0.75rem;
-  margin-bottom: 4px;
+  font-size: 0.65rem;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `
 
 const KpiValue = styled.div`
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   font-weight: 600;
 `
 
@@ -489,33 +621,6 @@ const PipelineGrid = styled.div`
   gap: 10px;
 `
 
-const PipelineSummaryRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-`
-
-const PipelineSummaryCard = styled.div`
-  background: var(--panel-strong);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 14px;
-  padding: 12px;
-  display: grid;
-  gap: 4px;
-`
-
-const PipelineSummaryLabel = styled.div`
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-`
-
-const PipelineSummaryValue = styled.div`
-  font-weight: 600;
-  font-size: 0.95rem;
-`
-
 const PipelineStrip = styled.div`
   position: relative;
   display: grid;
@@ -524,8 +629,8 @@ const PipelineStrip = styled.div`
   align-items: center;
   padding: 12px 10px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
 
   &::before {
     content: '';
@@ -564,7 +669,7 @@ const PipelineCard = styled.div`
   background: var(--panel-light);
   border-radius: 14px;
   padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--surface-border);
   display: grid;
   gap: 6px;
 `
@@ -579,11 +684,57 @@ const PipelineText = styled.div`
   line-height: 1.35;
 `
 
+const InsightGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+`
+
+const InsightCard = styled.div`
+  background: var(--panel-strong);
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid var(--surface-border);
+  display: grid;
+  gap: 6px;
+`
+
+const InsightLabel = styled.div`
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+`
+
+const InsightValue = styled.div`
+  font-size: 1.05rem;
+  font-weight: 600;
+`
+
+const InsightMeta = styled.div`
+  color: var(--muted);
+  font-size: 0.78rem;
+`
+
 const ChartCard = styled.div`
   background: var(--panel-strong);
   border-radius: 18px;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--surface-border);
+`
+
+const ChartScroll = styled.div`
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+`
+
+const ChartCanvas = styled.div`
+  min-width: 640px;
+
+  @media (max-width: 720px) {
+    min-width: 520px;
+  }
 `
 
 const ChartTitle = styled.h2`
@@ -645,9 +796,33 @@ const StatusBadge = styled.span`
   color: var(--success);
 `
 
-const FooterNote = styled.div`
+const BottomStatusBar = styled.div`
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+  padding: 0 20px;
+`
+
+const BottomStatusInner = styled.div`
+  width: min(1180px, 100%);
+  display: flex;
+  justify-content: flex-end;
+`
+
+const BottomStatusPill = styled.div`
+  pointer-events: auto;
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
   color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 999px;
   font-size: 0.75rem;
+  box-shadow: var(--shadow);
 `
 
 // ============================================================================
@@ -668,6 +843,16 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState(null)
   const [activePanel, setActivePanel] = useState('kpis')
   const [selectedCity, setSelectedCity] = useState('All cities')
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+    const storedTheme = window.localStorage.getItem('theme')
+    if (storedTheme) {
+      return storedTheme === 'dark'
+    }
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
   
   // ========================================================================
   // API CONFIGURATION
@@ -700,7 +885,21 @@ const Dashboard = () => {
   
   useEffect(() => {
     fetchDashboardData()
+
+    // Refresh dashboard data every 15 minutes
+    const refreshIntervalId = setInterval(fetchDashboardData, 15 * 60 * 1000)
+
+    return () => clearInterval(refreshIntervalId)
   }, [])  // Empty dependency array = run only on mount
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
+    const theme = isDarkMode ? 'dark' : 'light'
+    document.body.dataset.theme = theme
+    window.localStorage.setItem('theme', theme)
+  }, [isDarkMode])
   
   // ========================================================================
   // FUNCTION: Fetch all dashboard data
@@ -944,6 +1143,29 @@ const Dashboard = () => {
     }
   }, [filteredSummaryData])
 
+  const pipelineInsights = [
+    {
+      label: 'Cadence',
+      value: 'Daily 06:00 UTC',
+      meta: 'Scheduled Airflow run',
+    },
+    {
+      label: 'Window',
+      value: 'Last 7 days',
+      meta: 'Rolling archive window',
+    },
+    {
+      label: 'Retries',
+      value: '2 retries',
+      meta: '5 min backoff',
+    },
+    {
+      label: 'API timeout',
+      value: '30s',
+      meta: 'Open-Meteo request',
+    },
+  ]
+
   const trendOverview = useMemo(() => {
     if (!trendsData.length) {
       return []
@@ -1013,8 +1235,6 @@ const Dashboard = () => {
 
   const kpiItems = [
     { label: 'Total records', value: summaryStats.totalRecords, unit: '' },
-    { label: 'Average temperature', value: summaryStats.avgTemp, unit: '°C' },
-    { label: 'Max wind speed', value: summaryStats.maxWind, unit: 'km/h' },
     { label: 'Cities tracked', value: summaryStats.cities, unit: '' },
     { label: 'Anomaly signals', value: summaryStats.anomalySignals, unit: '' },
   ]
@@ -1281,8 +1501,14 @@ const Dashboard = () => {
                 ))}
               </CitySelect>
             </CityFilter>
-            <StatusPill>Updated {lastUpdateLabel}</StatusPill>
             <PrimaryButton onClick={fetchDashboardData}>Refresh</PrimaryButton>
+            <ThemeToggle
+              type="button"
+              aria-pressed={isDarkMode}
+              onClick={() => setIsDarkMode((prev) => !prev)}
+            >
+              {isDarkMode ? 'Light mode' : 'Dark mode'}
+            </ThemeToggle>
           </TopMeta>
         </TopBar>
 
@@ -1300,7 +1526,6 @@ const Dashboard = () => {
                   </Subtitle>
                   <HeroMetaRow>
                     <StatusPill>Pipeline healthy</StatusPill>
-                    <StatusPill>{summaryStats.anomalySignals} anomaly signals</StatusPill>
                     <StatusBadge>{anomalyStatus}</StatusBadge>
                   </HeroMetaRow>
                   <MiniStatsGrid>
@@ -1330,43 +1555,41 @@ const Dashboard = () => {
                     {extraCityCount > 0 && <CityPill>+{extraCityCount} more</CityPill>}
                   </CityRow>
                 </HeroCopy>
+                <HeroRight>
+                  <WeatherArt src={condition.icon} alt={`${condition.title} icon`} />
 
-                <WeatherArt src={condition.icon} alt={`${condition.title} icon`} />
+                  <TemperatureBlock>
+                    <TemperatureValue>
+                      {summaryStats.avgTemp}
+                      <TemperatureUnit>°C</TemperatureUnit>
+                    </TemperatureValue>
+                    <TemperatureMeta>
+                      <div>Scope: {primaryCity}</div>
+                      <div>Window: Last 7 days</div>
+                    </TemperatureMeta>
+                  </TemperatureBlock>
 
-                <TemperatureBlock>
-                  <TemperatureValue>
-                    {summaryStats.avgTemp}
-                    <TemperatureUnit>°C</TemperatureUnit>
-                  </TemperatureValue>
-                  <TemperatureMeta>
-                    <div>{summaryStats.totalRecords} observations</div>
-                    <div>{summaryStats.cities} cities tracked</div>
-                    <div>Last sync {lastUpdateLabel}</div>
-                  </TemperatureMeta>
-                </TemperatureBlock>
+                  <KpiInline>
+                    <KpiInlineTitle>Operational KPIs</KpiInlineTitle>
+                    <KpiGrid>
+                      {kpiItems.map((item, index) => (
+                        <KpiCard
+                          key={item.label}
+                          style={{ animationDelay: `${index * 0.08}s` }}
+                        >
+                          <KpiBody>
+                            <KpiLabel>{item.label}</KpiLabel>
+                            <KpiValue>
+                              {item.value}
+                              {item.unit && <KpiUnit>{item.unit}</KpiUnit>}
+                            </KpiValue>
+                          </KpiBody>
+                        </KpiCard>
+                      ))}
+                    </KpiGrid>
+                  </KpiInline>
+                </HeroRight>
               </HeroGrid>
-              <SectionHeader>
-                <SectionTitle>Operational KPIs</SectionTitle>
-                <SectionLead>
-                  Quick health checks across ingestion, storage, and analytics.
-                </SectionLead>
-              </SectionHeader>
-              <KpiGrid>
-                {kpiItems.map((item, index) => (
-                  <KpiCard
-                    key={item.label}
-                    style={{ animationDelay: `${index * 0.08}s` }}
-                  >
-                    <KpiBody>
-                      <KpiLabel>{item.label}</KpiLabel>
-                      <KpiValue>
-                        {item.value}
-                        {item.unit && <KpiUnit>{item.unit}</KpiUnit>}
-                      </KpiValue>
-                    </KpiBody>
-                  </KpiCard>
-                ))}
-              </KpiGrid>
               <WaveCard>
                 <WaveTitle>Temperature pulse (avg across cities)</WaveTitle>
                 {trendOverview.length > 0 ? (
@@ -1414,24 +1637,6 @@ const Dashboard = () => {
                   Every stage that moves the data from source to insight.
                 </SectionLead>
               </SectionHeader>
-              <PipelineSummaryRow>
-                <PipelineSummaryCard>
-                  <PipelineSummaryLabel>Records</PipelineSummaryLabel>
-                  <PipelineSummaryValue>{summaryStats.totalRecords}</PipelineSummaryValue>
-                </PipelineSummaryCard>
-                <PipelineSummaryCard>
-                  <PipelineSummaryLabel>Cities tracked</PipelineSummaryLabel>
-                  <PipelineSummaryValue>{summaryStats.cities}</PipelineSummaryValue>
-                </PipelineSummaryCard>
-                <PipelineSummaryCard>
-                  <PipelineSummaryLabel>Pipeline status</PipelineSummaryLabel>
-                  <PipelineSummaryValue>{anomalyStatus}</PipelineSummaryValue>
-                </PipelineSummaryCard>
-                <PipelineSummaryCard>
-                  <PipelineSummaryLabel>Last sync</PipelineSummaryLabel>
-                  <PipelineSummaryValue>{lastUpdateLabel}</PipelineSummaryValue>
-                </PipelineSummaryCard>
-              </PipelineSummaryRow>
               <PipelineStrip>
                 {pipelineItems.map((item) => (
                   <PipelineStep key={`strip-${item.title}`}>
@@ -1448,6 +1653,21 @@ const Dashboard = () => {
                   </PipelineCard>
                 ))}
               </PipelineGrid>
+              <SectionHeader>
+                <SectionTitle>Pipeline insights</SectionTitle>
+                <SectionLead>
+                  Live rollups for coverage, precipitation, and wind signals.
+                </SectionLead>
+              </SectionHeader>
+              <InsightGrid>
+                {pipelineInsights.map((insight) => (
+                  <InsightCard key={insight.label}>
+                    <InsightLabel>{insight.label}</InsightLabel>
+                    <InsightValue>{insight.value}</InsightValue>
+                    <InsightMeta>{insight.meta}</InsightMeta>
+                  </InsightCard>
+                ))}
+              </InsightGrid>
             </PanelSection>
           </Slide>
 
@@ -1463,61 +1683,65 @@ const Dashboard = () => {
                 <ChartTitle>7-Day Temperature Trends</ChartTitle>
                 {trendsData.length > 0 ? (
                   <>
-                    <ResponsiveContainer width="100%" height={320}>
-                      <LineChart data={trendsData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="rgba(30, 60, 120, 0.15)"
-                        />
-                        <XAxis
-                          dataKey="date"
-                          tick={{ fontSize: 12, fill: '#5e789e' }}
-                          angle={-25}
-                          textAnchor="end"
-                          height={55}
-                        />
-                        <YAxis tick={{ fill: '#5e789e' }} />
-                        <Tooltip
-                          formatter={(value) => Number(value).toFixed(1)}
-                          contentStyle={{
-                            background: '#ffffff',
-                            border: '1px solid rgba(90, 156, 255, 0.3)',
-                            borderRadius: '10px',
-                            color: '#1b2b46',
-                            boxShadow: '0 10px 25px rgba(74, 120, 200, 0.18)',
-                          }}
-                        />
-                        {(activeCities.length <= 4) && (
-                          <Legend wrapperStyle={{ paddingTop: '8px' }} />
-                        )}
-                        {activeCities.map((city, index) => (
-                          <Line
-                            key={`avg-${city}`}
-                            type="monotone"
-                            dataKey={`temp_avg_${city}`}
-                            stroke={linePalette[index % linePalette.length]}
-                            name={`${city} Avg`}
-                            strokeWidth={2}
-                            dot={false}
-                            connectNulls
-                          />
-                        ))}
-                        {activeCities.map((city, index) => (
-                          <Line
-                            key={`roll-${city}`}
-                            type="monotone"
-                            dataKey={`temp_roll_${city}`}
-                            stroke={linePalette[index % linePalette.length]}
-                            name={`${city} 7d Avg`}
-                            strokeDasharray="5 5"
-                            strokeWidth={1.5}
-                            dot={false}
-                            connectNulls
-                            opacity={0.6}
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <ChartScroll>
+                      <ChartCanvas>
+                        <ResponsiveContainer width="100%" height={320}>
+                          <LineChart data={trendsData}>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="rgba(30, 60, 120, 0.15)"
+                            />
+                            <XAxis
+                              dataKey="date"
+                              tick={{ fontSize: 12, fill: '#5e789e' }}
+                              angle={-25}
+                              textAnchor="end"
+                              height={55}
+                            />
+                            <YAxis tick={{ fill: '#5e789e' }} />
+                            <Tooltip
+                              formatter={(value) => Number(value).toFixed(1)}
+                              contentStyle={{
+                                background: '#ffffff',
+                                border: '1px solid rgba(90, 156, 255, 0.3)',
+                                borderRadius: '10px',
+                                color: '#1b2b46',
+                                boxShadow: '0 10px 25px rgba(74, 120, 200, 0.18)',
+                              }}
+                            />
+                            {(activeCities.length <= 4) && (
+                              <Legend wrapperStyle={{ paddingTop: '8px' }} />
+                            )}
+                            {activeCities.map((city, index) => (
+                              <Line
+                                key={`avg-${city}`}
+                                type="monotone"
+                                dataKey={`temp_avg_${city}`}
+                                stroke={linePalette[index % linePalette.length]}
+                                name={`${city} Avg`}
+                                strokeWidth={2}
+                                dot={false}
+                                connectNulls
+                              />
+                            ))}
+                            {activeCities.map((city, index) => (
+                              <Line
+                                key={`roll-${city}`}
+                                type="monotone"
+                                dataKey={`temp_roll_${city}`}
+                                stroke={linePalette[index % linePalette.length]}
+                                name={`${city} 7d Avg`}
+                                strokeDasharray="5 5"
+                                strokeWidth={1.5}
+                                dot={false}
+                                connectNulls
+                                opacity={0.6}
+                              />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </ChartCanvas>
+                    </ChartScroll>
                     <InfoNote>
                       Rolling 7-day averages are calculated in the SQL layer.
                     </InfoNote>
@@ -1541,32 +1765,36 @@ const Dashboard = () => {
                 <ChartTitle>Weather Summary by Location</ChartTitle>
                 {summaryChartData.length > 0 ? (
                   <>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={summaryChartData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="rgba(30, 60, 120, 0.15)"
-                        />
-                        <XAxis dataKey="city_name" tick={{ fill: '#5e789e' }} />
-                        <YAxis tick={{ fill: '#5e789e' }} />
-                        <Tooltip
-                          formatter={(value) => Number(value).toFixed(1)}
-                          contentStyle={{
-                            background: '#ffffff',
-                            border: '1px solid rgba(90, 156, 255, 0.3)',
-                            borderRadius: '10px',
-                            color: '#1b2b46',
-                            boxShadow: '0 10px 25px rgba(74, 120, 200, 0.18)',
-                          }}
-                        />
-                        {(summaryChartData.length <= 6) && (
-                          <Legend wrapperStyle={{ paddingTop: '8px' }} />
-                        )}
-                        <Bar dataKey="min_temperature" fill="#7aa7ff" name="Min" />
-                        <Bar dataKey="avg_temperature" fill="#5a9cff" name="Avg" />
-                        <Bar dataKey="max_temperature" fill="#ffb36b" name="Max" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <ChartScroll>
+                      <ChartCanvas>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={summaryChartData}>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="rgba(30, 60, 120, 0.15)"
+                            />
+                            <XAxis dataKey="city_name" tick={{ fill: '#5e789e' }} />
+                            <YAxis tick={{ fill: '#5e789e' }} />
+                            <Tooltip
+                              formatter={(value) => Number(value).toFixed(1)}
+                              contentStyle={{
+                                background: '#ffffff',
+                                border: '1px solid rgba(90, 156, 255, 0.3)',
+                                borderRadius: '10px',
+                                color: '#1b2b46',
+                                boxShadow: '0 10px 25px rgba(74, 120, 200, 0.18)',
+                              }}
+                            />
+                            {(summaryChartData.length <= 6) && (
+                              <Legend wrapperStyle={{ paddingTop: '8px' }} />
+                            )}
+                            <Bar dataKey="min_temperature" fill="#7aa7ff" name="Min" />
+                            <Bar dataKey="avg_temperature" fill="#5a9cff" name="Avg" />
+                            <Bar dataKey="max_temperature" fill="#ffb36b" name="Max" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </ChartCanvas>
+                    </ChartScroll>
                     <InfoNote>Aggregated across all historical observations.</InfoNote>
                   </>
                 ) : (
@@ -1588,48 +1816,52 @@ const Dashboard = () => {
                 <ChartTitle>Temperature Anomaly Signals</ChartTitle>
                 {analysisData.length > 0 ? (
                   <>
-                    <ResponsiveContainer width="100%" height={320}>
-                      <LineChart data={analysisData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="rgba(30, 60, 120, 0.15)"
-                        />
-                        <XAxis
-                          dataKey="date"
-                          tick={{ fontSize: 12, fill: '#5e789e' }}
-                          angle={-25}
-                          textAnchor="end"
-                          height={55}
-                        />
-                        <YAxis tick={{ fill: '#5e789e' }} />
-                        <Tooltip
-                          formatter={(value) => Number(value).toFixed(2)}
-                          contentStyle={{
-                            background: '#ffffff',
-                            border: '1px solid rgba(90, 156, 255, 0.3)',
-                            borderRadius: '10px',
-                            color: '#1b2b46',
-                            boxShadow: '0 10px 25px rgba(74, 120, 200, 0.18)',
-                          }}
-                        />
-                        {(activeCities.length <= 4) && (
-                          <Legend wrapperStyle={{ paddingTop: '8px' }} />
-                        )}
-                        <ReferenceLine y={0} stroke="#ffb36b" strokeDasharray="4 4" />
-                        {activeCities.map((city, index) => (
-                          <Line
-                            key={`zscore-${city}`}
-                            type="monotone"
-                            dataKey={`zscore_${city}`}
-                            stroke={linePalette[index % linePalette.length]}
-                            name={`${city} Z-Score`}
-                            strokeWidth={2}
-                            dot={false}
-                            connectNulls
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <ChartScroll>
+                      <ChartCanvas>
+                        <ResponsiveContainer width="100%" height={320}>
+                          <LineChart data={analysisData}>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="rgba(30, 60, 120, 0.15)"
+                            />
+                            <XAxis
+                              dataKey="date"
+                              tick={{ fontSize: 12, fill: '#5e789e' }}
+                              angle={-25}
+                              textAnchor="end"
+                              height={55}
+                            />
+                            <YAxis tick={{ fill: '#5e789e' }} />
+                            <Tooltip
+                              formatter={(value) => Number(value).toFixed(2)}
+                              contentStyle={{
+                                background: '#ffffff',
+                                border: '1px solid rgba(90, 156, 255, 0.3)',
+                                borderRadius: '10px',
+                                color: '#1b2b46',
+                                boxShadow: '0 10px 25px rgba(74, 120, 200, 0.18)',
+                              }}
+                            />
+                            {(activeCities.length <= 4) && (
+                              <Legend wrapperStyle={{ paddingTop: '8px' }} />
+                            )}
+                            <ReferenceLine y={0} stroke="#ffb36b" strokeDasharray="4 4" />
+                            {activeCities.map((city, index) => (
+                              <Line
+                                key={`zscore-${city}`}
+                                type="monotone"
+                                dataKey={`zscore_${city}`}
+                                stroke={linePalette[index % linePalette.length]}
+                                name={`${city} Z-Score`}
+                                strokeWidth={2}
+                                dot={false}
+                                connectNulls
+                              />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </ChartCanvas>
+                    </ChartScroll>
                     <InfoNote>Values beyond |2| indicate unusual shifts.</InfoNote>
                   </>
                 ) : (
@@ -1639,9 +1871,12 @@ const Dashboard = () => {
             </PanelSection>
           </Slide>
         </SlideViewport>
-
-        <FooterNote>Dashboard refreshed {lastUpdateLabel}.</FooterNote>
       </MainPanel>
+      <BottomStatusBar>
+        <BottomStatusInner>
+          <BottomStatusPill>Dashboard refreshed {lastUpdateLabel}.</BottomStatusPill>
+        </BottomStatusInner>
+      </BottomStatusBar>
     </DashboardShell>
   )
 }

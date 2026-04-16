@@ -102,6 +102,7 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
       AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME: ${AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME}
       AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD: ${AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD}
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.session,airflow.api.auth.backend.basic_auth
       
       
       # Data Warehouse connection (for ETL tasks)

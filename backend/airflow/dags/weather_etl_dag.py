@@ -81,6 +81,7 @@ OPENMETEO_API_URL = os.getenv(
     'OPENMETEO_API_URL',
     'https://archive-api.open-meteo.com/v1/archive'
 )
+OPENMETEO_TIMEOUT = int(os.getenv('OPENMETEO_TIMEOUT', '30'))
 WEATHER_CITIES = os.getenv(
     'WEATHER_CITIES',
     'New York,London,Tokyo,New Delhi,Mumbai,Bengaluru,Chennai,Kolkata'
@@ -137,7 +138,7 @@ dag = DAG(
     schedule_interval='0 6 * * *',  # Run daily at 6:00 AM UTC
     catchup=False,
     tags=['weather', 'etl', 'production'],
-    max_active_runs=1,  # Prevent parallel runs
+    max_active_runs=2,  # Allow one queued run to start if another is stuck
 )
 
 
@@ -231,7 +232,7 @@ def ingest_weather_data(**context):
             }
             
             # Make HTTP GET request
-            response = requests.get(api_url, params=params, timeout=10)
+            response = requests.get(api_url, params=params, timeout=OPENMETEO_TIMEOUT)
             response.raise_for_status()  # Raise exception for HTTP errors
             
             # Parse JSON response
@@ -241,6 +242,11 @@ def ingest_weather_data(**context):
             
             raw_data_dict[city_name] = data
             
+        except requests.exceptions.Timeout as e:
+            logger.warning(
+                f"⚠ Timeout fetching data for {city_name}: {str(e)}. Skipping city."
+            )
+            continue
         except requests.exceptions.RequestException as e:
             logger.error(f"✗ Failed to fetch data for {city_name}: {str(e)}")
             raise
@@ -250,6 +256,9 @@ def ingest_weather_data(**context):
     # ========================================================================
     # XCom allows data passing between tasks
     
+    if not raw_data_dict:
+        raise ValueError("No data retrieved from Open-Meteo API")
+
     task_instance.xcom_push(key='raw_weather_data', value=raw_data_dict)
     logger.info("\n✓ Raw data pushed to XCom for processing")
     logger.info(f"  Total cities ingested: {len(raw_data_dict)}")
