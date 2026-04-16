@@ -2,9 +2,10 @@
 
 ## Overview
 
-This is the frontend application for the Weather Forecast Analytical DB dashboard. It provides an interactive, responsive UI for visualizing weather data using Recharts, with two main visualizations:
-- 7-Day Temperature Trends (Line Chart)
-- Weather Summary by Location (Bar Chart)
+This is the frontend application for the Weather Forecast Analytical DB dashboard. It provides an interactive, responsive UI for visualizing weather data using Recharts across tabbed panels:
+- 7-Day Temperature Trends
+- Weather Summary by Location
+- Temperature Anomalies
 
 ## Architecture
 
@@ -24,16 +25,17 @@ src/
 │       ├── State management (useState)
 │       ├── Data fetching (useEffect)
 │       ├── API client setup (axios)
-│       ├── Line Chart (Temperature Trends)
-│       └── Bar Chart (Weather Summary)
+│       ├── Trend and summary charts
+│       └── Anomaly analysis panels
 ```
 
 ### Data Flow
 ```
 FastAPI Backend
       ↓
-  /api/temperature-trends
-  /api/weather-summary
+   /api/temperature-trends
+   /api/weather-summary
+   /api/temperature-anomalies
       ↓
   Axios API Calls
       ↓
@@ -78,7 +80,7 @@ FastAPI Backend
 
 5. **View Application**
    - Open browser: http://localhost:5173
-   - Should see dashboard with two charts
+   - Should see dashboard with tabbed panels and charts
    - If backend is running and has data, charts will display
 
 ### Development Commands

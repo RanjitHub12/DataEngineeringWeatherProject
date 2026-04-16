@@ -54,6 +54,31 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
 }
 ```
 
+### 3. GET /api/temperature-anomalies
+**Purpose**: Fetch rolling averages and temperature anomaly signals
+
+**Query Parameters**:
+- `days` (optional, default=30): Number of days to retrieve (1-365)
+
+**Response**:
+```json
+{
+   "status": "success",
+   "data": [
+      {
+         "city_name": "New York",
+         "date_value": "2024-01-15",
+         "temperature_avg": 5.2,
+         "temperature_avg_7day": 4.9,
+         "temperature_zscore": 1.3,
+         "precipitation_7day": 12.5
+      }
+   ],
+   "count": 30,
+   "date_range": "2024-01-09 to 2024-02-07"
+}
+```
+
 ### 3. GET /health
 **Purpose**: Health check endpoint for monitoring
 
@@ -97,8 +122,8 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
    **Key Configuration Notes:**
    - `POSTGRES_HOST=localhost` (for running backend locally on your machine)
    - `POSTGRES_HOST=weather-postgres` (only when backend runs in Docker container)
-   - `POSTGRES_PORT=5432` (exposed by docker-compose on host)
-   - All other credentials should match your docker-compose.yml setup
+   - `POSTGRES_PORT=5434` (default host port from backend/.env.example)
+   - All other credentials should match your backend/docker-compose.yml setup
 
 4. **Run Server**
    ```bash
@@ -113,6 +138,7 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
    - Health Check: http://localhost:8000/health
    - Temperature Trends: http://localhost:8000/api/temperature-trends
    - Weather Summary: http://localhost:8000/api/weather-summary
+   - Temperature Anomalies: http://localhost:8000/api/temperature-anomalies
 
 ## Docker Development
 
