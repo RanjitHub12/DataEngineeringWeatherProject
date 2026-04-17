@@ -193,10 +193,8 @@ Vite is configured in `vite.config.js` with:
    ```
 
 3. **Deploy**
-   ```bash
-   # Push dist/ to gh-pages branch
-   npm run deploy
-   ```
+   - Publish the `dist/` folder to GitHub Pages (manual upload or a gh-pages workflow).
+   - This repo does not include a deploy script by default.
 
 ### Option 4: Self-Hosted (VPS, Dedicated Server)
 
@@ -324,11 +322,31 @@ When modifying the dashboard:
       "temperature_avg": 5.2,
       "temperature_min": 2.1,
       "temperature_max": 8.5,
-      "humidity": 65.0
+         "humidity": 65.0,
+         "temperature_avg_7day": 6.1
     }
   ],
   "count": 21,
   "date_range": "2024-01-09 to 2024-01-15"
+}
+```
+
+### /api/temperature-anomalies
+```json
+{
+   "status": "success",
+   "data": [
+      {
+         "city_name": "New York",
+         "date_value": "2024-01-15",
+         "temperature_avg": 5.2,
+         "temperature_avg_7day": 4.9,
+         "temperature_zscore": 1.3,
+         "precipitation_7day": 12.5
+      }
+   ],
+   "count": 30,
+   "date_range": "2024-01-09 to 2024-02-07"
 }
 ```
 

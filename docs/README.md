@@ -22,10 +22,12 @@ Copy-Item backend/.env.example backend/.env
 docker compose --env-file backend/.env -f backend/docker-compose.yml up -d --build
 ```
 
-### 3) Initialize the warehouse (first run)
+### 3) (Optional) Initialize or reset the warehouse
 ```powershell
 docker exec weather-postgres psql -U weather_user -d weather_dw -f /docker-entrypoint-initdb.d/init.sql
 ```
+Note: The Postgres container runs `init.sql` automatically on first startup with a fresh volume.
+Running this command later will drop and recreate tables (data reset).
 
 ### 4) Open the UIs
 - Airflow: http://localhost:8080 (airflow / airflow)

@@ -10,7 +10,7 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
 **Purpose**: Fetch 7-day temperature trend data for line chart visualization
 
 **Query Parameters**:
-- `days` (optional, default=7): Number of days to retrieve
+- `days` (optional, default=7): Number of days to retrieve (1-365)
 
 **Response**:
 ```json
@@ -23,7 +23,8 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
       "temperature_avg": 5.2,
       "temperature_min": 2.1,
       "temperature_max": 8.5,
-      "humidity": 65.0
+      "humidity": 65.0,
+      "temperature_avg_7day": 6.1
     }
   ],
   "count": 21,
@@ -57,6 +58,10 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
 ### 3. GET /api/temperature-anomalies
 **Purpose**: Fetch rolling averages and temperature anomaly signals
 
+**Notes**:
+- This endpoint reads from `fact_weather_analysis`, which is populated by the Airflow analysis task.
+- If the table is empty or missing, the API returns a warning with an empty data array.
+
 **Query Parameters**:
 - `days` (optional, default=30): Number of days to retrieve (1-365)
 
@@ -79,7 +84,7 @@ This is the backend API for the Weather Forecast Analytical DB project. It provi
 }
 ```
 
-### 3. GET /health
+### 4. GET /health
 **Purpose**: Health check endpoint for monitoring
 
 **Response**:
@@ -242,8 +247,9 @@ postgresql://username:password@host:port/database
 5. Session automatically closed after request completes
 
 ### Query Optimization
-- Uses pre-built database views for complex aggregations
-- Views computed once and reused for multiple requests
+- Temperature trends use a direct SQL query with window functions
+- Weather summary uses the `vw_weather_summary_by_location` view
+- Anomalies are read from `fact_weather_analysis`
 - Indexes on dimensional tables for fast joins
 
 ## Monitoring & Logging
@@ -295,8 +301,8 @@ Navigate to: `http://localhost:8000/redoc`
 
 ### CORS errors in browser console
 - Check frontend URL matches CORS configuration in main.py
-- Verify `ALLOWED_ORIGINS` in .env
-- Frontend must send requests from allowed origin
+- CORS origins are currently defined in `allowed_origins` inside `main.py`
+- Frontend must send requests from an allowed origin
 
 ## Technology Stack
 
